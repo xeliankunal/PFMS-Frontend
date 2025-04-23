@@ -61,6 +61,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom finance app colors
+				finance: {
+					primary: '#9b87f5',
+					secondary: '#7E69AB',
+					tertiary: '#6E59A5',
+					soft: '#E5DEFF',
+					background: '#F1F0FB',
+					text: '#1A1F2C',
+					muted: '#8E9196',
+					danger: '#ea384c'
 				}
 			},
 			borderRadius: {
