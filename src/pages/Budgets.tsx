@@ -6,37 +6,38 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { IndianRupee, Plus, Edit, BookCheck } from "lucide-react";
+import { IndianRupee, Plus, Edit, BookCheck, WalletCards } from "lucide-react";
 import { format } from "date-fns";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 const Budgets = () => {
-  const { categories, budgets, transactions, createBudget, updateBudget, deleteBudget } = useFinance();
+  const { categories, budgets, transactions, createBudget, updateBudget, deleteBudget, createTransaction } = useFinance();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<any | null>(null);
   const [newBudget, setNewBudget] = useState({
     categoryId: "",
-    month: new Date().getMonth() + 1, // 1-12
+    month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
     amount: 0
   });
-  
+
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [budgetReports, setBudgetReports] = useState<any[]>([]);
-  
+
   useEffect(() => {
     calculateBudgetReports();
   }, [budgets, transactions, currentMonth, currentYear]);
-  
+
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
     }).format(amount);
   };
-  
+
   const calculateBudgetReports = () => {
     const reports: any[] = [];
     
@@ -45,14 +46,12 @@ const Budgets = () => {
     );
     
     budgetCategories.forEach(category => {
-      // Find budget for this category in the selected month
       const budget = budgets.find(b => 
         b.categoryId === category.id && 
         b.month === currentMonth && 
         b.year === currentYear
       );
       
-      // Calculate spent amount
       const categoryTransactions = transactions.filter(t => 
         t.categoryId === category.id && 
         t.amount < 0 &&
@@ -62,7 +61,6 @@ const Budgets = () => {
       
       const spentAmount = categoryTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
       
-      // Add to reports
       if (budget) {
         const remainingAmount = budget.amount - spentAmount;
         const percentage = (spentAmount / budget.amount) * 100;
@@ -75,10 +73,9 @@ const Budgets = () => {
           budgetAmount: budget.amount,
           spentAmount,
           remainingAmount,
-          percentage: Math.min(percentage, 100) // Cap at 100%
+          percentage: Math.min(percentage, 100)
         });
       } else if (spentAmount > 0) {
-        // Categories with expenses but no budget
         reports.push({
           categoryId: category.id,
           categoryName: category.name,
@@ -87,17 +84,16 @@ const Budgets = () => {
           budgetAmount: 0,
           spentAmount,
           remainingAmount: 0,
-          percentage: 100 // 100% of no budget is still 100%
+          percentage: 100
         });
       }
     });
     
-    // Sort by percentage (highest first)
     reports.sort((a, b) => b.percentage - a.percentage);
     
     setBudgetReports(reports);
   };
-  
+
   const handleAddBudget = async () => {
     await createBudget(newBudget);
     setNewBudget({
@@ -108,7 +104,7 @@ const Budgets = () => {
     });
     setIsAddDialogOpen(false);
   };
-  
+
   const handleEditBudget = async () => {
     if (selectedBudget?.budgetId) {
       await updateBudget(selectedBudget.budgetId, {
@@ -118,18 +114,42 @@ const Budgets = () => {
       setSelectedBudget(null);
     }
   };
-  
+
   const handleSelectBudgetForEdit = (budget: any) => {
     setSelectedBudget({...budget});
     setIsEditDialogOpen(true);
   };
-  
+
   const handleDeleteBudget = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this budget?")) {
       await deleteBudget(id);
     }
   };
-  
+
+  const handleAddToTransaction = async (report: any) => {
+    try {
+      const defaultAccount = categories.find(c => c.type === 'budget')?.id;
+      
+      if (!defaultAccount) {
+        toast.error("No budget account found. Please create one first.");
+        return;
+      }
+
+      await createTransaction({
+        accountId: defaultAccount,
+        categoryId: report.categoryId,
+        amount: -Math.abs(report.budgetAmount),
+        description: `Budget allocation for ${report.categoryName}`,
+        date: new Date()
+      });
+
+      toast.success("Budget added as transaction successfully!");
+    } catch (error) {
+      toast.error("Failed to create transaction from budget");
+      console.error("Error creating transaction:", error);
+    }
+  };
+
   const months = [
     { value: 1, label: "January" },
     { value: 2, label: "February" },
@@ -144,12 +164,12 @@ const Budgets = () => {
     { value: 11, label: "November" },
     { value: 12, label: "December" }
   ];
-  
+
   const years = Array.from(
     { length: 5 }, 
     (_, i) => new Date().getFullYear() - 2 + i
   );
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -254,7 +274,6 @@ const Budgets = () => {
         </Dialog>
       </div>
 
-      {/* Edit Budget Dialog */}
       {selectedBudget && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
@@ -292,7 +311,6 @@ const Budgets = () => {
         </Dialog>
       )}
 
-      {/* Month & Year Selector */}
       <Card className="shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Budget Period</CardTitle>
@@ -339,7 +357,6 @@ const Budgets = () => {
         </CardContent>
       </Card>
 
-      {/* Budget Reports */}
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>Budgets for {months.find(m => m.value === currentMonth)?.label} {currentYear}</CardTitle>
@@ -377,14 +394,25 @@ const Budgets = () => {
                         {formatAmount(report.spentAmount)} / {formatAmount(report.budgetAmount || 0)}
                       </span>
                       {report.budgetId && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={() => handleSelectBudgetForEdit(report)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={() => handleSelectBudgetForEdit(report)}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6"
+                            onClick={() => handleAddToTransaction(report)}
+                          >
+                            <WalletCards className="h-3 w-3 mr-1" />
+                            Add to Transaction
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>

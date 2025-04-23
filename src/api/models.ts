@@ -23,9 +23,9 @@ export interface Category {
   id: string;
   userId: string;
   name: string;
-  type: 'income' | 'expense';
-  color: string; // Hex color code
-  budgetEnabled: boolean; // New field to track if category can be used in budgets
+  type: 'income' | 'expense' | 'budget';  // Added 'budget' type
+  color: string;
+  budgetEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,7 +65,17 @@ export class MockDatabase {
   constructor() {
     // Default categories
     const defaultCategories: Partial<Category>[] = [
+      // Income categories
       { name: 'Salary', type: 'income', color: '#4CAF50', budgetEnabled: true },
+      { name: 'Investments', type: 'income', color: '#4CAF50', budgetEnabled: true },
+      { name: 'Other Income', type: 'income', color: '#8BC34A', budgetEnabled: true },
+      
+      // Budget categories
+      { name: 'Monthly Budget', type: 'budget', color: '#2196F3', budgetEnabled: true },
+      { name: 'Emergency Fund', type: 'budget', color: '#673AB7', budgetEnabled: true },
+      { name: 'Savings Goal', type: 'budget', color: '#009688', budgetEnabled: true },
+      
+      // Expense categories
       { name: 'Food & Dining', type: 'expense', color: '#FF5722', budgetEnabled: true },
       { name: 'Transportation', type: 'expense', color: '#2196F3', budgetEnabled: true },
       { name: 'Housing', type: 'expense', color: '#673AB7', budgetEnabled: true },
@@ -76,8 +86,6 @@ export class MockDatabase {
       { name: 'Personal Care', type: 'expense', color: '#795548', budgetEnabled: false },
       { name: 'Education', type: 'expense', color: '#607D8B', budgetEnabled: true },
       { name: 'Gifts & Donations', type: 'expense', color: '#F44336', budgetEnabled: false },
-      { name: 'Investments', type: 'income', color: '#4CAF50', budgetEnabled: true },
-      { name: 'Other Income', type: 'income', color: '#8BC34A', budgetEnabled: true },
       { name: 'Other Expenses', type: 'expense', color: '#9E9E9E', budgetEnabled: false },
     ];
 
