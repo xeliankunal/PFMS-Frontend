@@ -53,7 +53,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const storedUser = localStorage.getItem('financeUser');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('financeUser');
+      }
     }
     setLoading(false);
   }, []);
@@ -111,10 +116,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Load data when the user changes
   useEffect(() => {
     if (auth.user) {
-      loadAccounts();
-      loadCategories();
-      loadTransactions();
-      loadBudgets();
+      // Load data in sequence to ensure dependencies are handled properly
+      const loadAllData = async () => {
+        await loadAccounts();
+        await loadCategories();
+        await loadTransactions();
+        await loadBudgets();
+      };
+      
+      loadAllData();
     } else {
       // Clear data when user logs out
       setAccounts([]);

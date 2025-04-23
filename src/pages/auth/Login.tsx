@@ -15,15 +15,17 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/api/context";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("demo@example.com");
+  const [password, setPassword] = useState("password123");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +35,10 @@ const Login = () => {
     try {
       const success = await login(email, password);
       if (success) {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to your Finance Dashboard!",
+        });
         navigate("/dashboard");
       } else {
         setError("Invalid email or password");
@@ -95,6 +101,10 @@ const Login = () => {
               >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
+              <div className="text-center text-sm text-gray-500">
+                <p>Demo credentials are pre-filled.</p>
+                <p>You can login or create your own account.</p>
+              </div>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
