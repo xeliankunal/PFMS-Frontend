@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useFinance } from "@/api/context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,10 +41,8 @@ const Transactions = () => {
   
   const [filterAccount, setFilterAccount] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
-  const [filterStartDate, setFilterStartDate] = useState<Date | undefined>(undefined);
-  const [filterEndDate, setFilterEndDate] = useState<Date | undefined>(undefined);
+  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
 
-  // Initialize transaction form with first account if exists
   useEffect(() => {
     if (accounts.length > 0 && newTransaction.accountId === "") {
       setNewTransaction(prev => ({
@@ -64,7 +61,6 @@ const Transactions = () => {
       date: newTransaction.date
     });
     
-    // Reset form
     setNewTransaction({
       accountId: accounts.length > 0 ? accounts[0].id : "",
       categoryId: "",
@@ -101,17 +97,18 @@ const Transactions = () => {
   };
 
   const filteredTransactions = transactions.filter(transaction => {
-    const matchesAccount = !filterAccount || transaction.accountId === filterAccount;
-    const matchesCategory = !filterCategory || transaction.categoryId === filterCategory;
+    const matchesAccount = !filterAccount || filterAccount === 'all' || transaction.accountId === filterAccount;
+    const matchesCategory = !filterCategory || filterCategory === 'all' || transaction.categoryId === filterCategory;
     
     const transactionDate = new Date(transaction.date);
-    const matchesStartDate = !filterStartDate || transactionDate >= filterStartDate;
-    const matchesEndDate = !filterEndDate || transactionDate <= filterEndDate;
+    const matchesDate = !filterDate || 
+      (transactionDate.getFullYear() === filterDate.getFullYear() &&
+       transactionDate.getMonth() === filterDate.getMonth() &&
+       transactionDate.getDate() === filterDate.getDate());
     
-    return matchesAccount && matchesCategory && matchesStartDate && matchesEndDate;
+    return matchesAccount && matchesCategory && matchesDate;
   });
 
-  // Sort transactions by date (newest first)
   const sortedTransactions = [...filteredTransactions].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
@@ -211,12 +208,13 @@ const Transactions = () => {
                       {format(newTransaction.date, "PP")}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={newTransaction.date}
                       onSelect={(date) => setNewTransaction({...newTransaction, date: date || new Date()})}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
@@ -235,13 +233,12 @@ const Transactions = () => {
         </Dialog>
       </div>
 
-      {/* Filter Section */}
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="filterAccount">Account</Label>
               <Select 
@@ -290,7 +287,7 @@ const Transactions = () => {
             </div>
             
             <div className="space-y-2">
-              <Label>Start Date</Label>
+              <Label>Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -298,38 +295,16 @@ const Transactions = () => {
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filterStartDate ? format(filterStartDate, "PP") : "Select date"}
+                    {filterDate ? format(filterDate, "PP") : "Select date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={filterStartDate}
-                    onSelect={setFilterStartDate}
+                    selected={filterDate}
+                    onSelect={setFilterDate}
                     initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>End Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filterEndDate ? format(filterEndDate, "PP") : "Select date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={filterEndDate}
-                    onSelect={setFilterEndDate}
-                    initialFocus
+                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -338,7 +313,6 @@ const Transactions = () => {
         </CardContent>
       </Card>
 
-      {/* Transactions Table */}
       <Card>
         <CardHeader>
           <CardTitle>Transaction List</CardTitle>
@@ -419,7 +393,6 @@ const Transactions = () => {
         </CardContent>
       </Card>
       
-      {/* Edit Transaction Dialog */}
       {selectedTransaction && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
@@ -503,12 +476,13 @@ const Transactions = () => {
                       {format(new Date(selectedTransaction.date), "PP")}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={new Date(selectedTransaction.date)}
                       onSelect={(date) => setSelectedTransaction({...selectedTransaction, date: date || new Date()})}
                       initialFocus
+                      className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
