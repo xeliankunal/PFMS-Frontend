@@ -40,8 +40,8 @@ const Transactions = () => {
     date: new Date()
   });
   
-  const [filterAccount, setFilterAccount] = useState<string>("");
-  const [filterCategory, setFilterCategory] = useState<string>("");
+  const [filterAccount, setFilterAccount] = useState<string | null>(null);
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
   const [filterStartDate, setFilterStartDate] = useState<Date | undefined>(undefined);
   const [filterEndDate, setFilterEndDate] = useState<Date | undefined>(undefined);
 
@@ -245,14 +245,14 @@ const Transactions = () => {
             <div className="space-y-2">
               <Label htmlFor="filterAccount">Account</Label>
               <Select 
-                value={filterAccount} 
+                value={filterAccount || undefined}
                 onValueChange={setFilterAccount}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All accounts" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All accounts</SelectItem>
+                  <SelectItem value="all">All accounts</SelectItem>
                   {accounts.map(account => (
                     <SelectItem key={account.id} value={account.id}>
                       {account.name}
@@ -265,14 +265,14 @@ const Transactions = () => {
             <div className="space-y-2">
               <Label htmlFor="filterCategory">Category</Label>
               <Select 
-                value={filterCategory} 
+                value={filterCategory || undefined}
                 onValueChange={setFilterCategory}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All categories</SelectItem>
+                  <SelectItem value="all">All categories</SelectItem>
                   <div className="font-semibold p-2 text-xs text-muted-foreground">INCOME</div>
                   {incomeCategories.map(category => (
                     <SelectItem key={category.id} value={category.id}>
