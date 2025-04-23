@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useFinance } from "@/api/context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -41,9 +40,11 @@ const Budgets = () => {
   const calculateBudgetReports = () => {
     const reports: any[] = [];
     
-    const expenseCategories = categories.filter(cat => cat.type === "expense");
+    const budgetCategories = categories.filter(cat => 
+      cat.type === "expense" && cat.budgetEnabled
+    );
     
-    expenseCategories.forEach(category => {
+    budgetCategories.forEach(category => {
       // Find budget for this category in the selected month
       const budget = budgets.find(b => 
         b.categoryId === category.id && 
@@ -176,7 +177,7 @@ const Budgets = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {categories
-                      .filter(category => category.type === "expense")
+                      .filter(category => category.type === "expense" && category.budgetEnabled)
                       .map(category => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}

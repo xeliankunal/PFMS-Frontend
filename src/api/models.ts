@@ -1,4 +1,3 @@
-
 // Mock database models for our finance application
 // In a real application, these would connect to an actual database
 
@@ -26,6 +25,7 @@ export interface Category {
   name: string;
   type: 'income' | 'expense';
   color: string; // Hex color code
+  budgetEnabled: boolean; // New field to track if category can be used in budgets
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,20 +65,20 @@ export class MockDatabase {
   constructor() {
     // Default categories
     const defaultCategories: Partial<Category>[] = [
-      { name: 'Salary', type: 'income', color: '#4CAF50' },
-      { name: 'Food & Dining', type: 'expense', color: '#FF5722' },
-      { name: 'Transportation', type: 'expense', color: '#2196F3' },
-      { name: 'Housing', type: 'expense', color: '#673AB7' },
-      { name: 'Entertainment', type: 'expense', color: '#E91E63' },
-      { name: 'Shopping', type: 'expense', color: '#9C27B0' },
-      { name: 'Utilities', type: 'expense', color: '#FF9800' },
-      { name: 'Healthcare', type: 'expense', color: '#00BCD4' },
-      { name: 'Personal Care', type: 'expense', color: '#795548' },
-      { name: 'Education', type: 'expense', color: '#607D8B' },
-      { name: 'Gifts & Donations', type: 'expense', color: '#F44336' },
-      { name: 'Investments', type: 'income', color: '#4CAF50' },
-      { name: 'Other Income', type: 'income', color: '#8BC34A' },
-      { name: 'Other Expenses', type: 'expense', color: '#9E9E9E' },
+      { name: 'Salary', type: 'income', color: '#4CAF50', budgetEnabled: true },
+      { name: 'Food & Dining', type: 'expense', color: '#FF5722', budgetEnabled: true },
+      { name: 'Transportation', type: 'expense', color: '#2196F3', budgetEnabled: true },
+      { name: 'Housing', type: 'expense', color: '#673AB7', budgetEnabled: true },
+      { name: 'Entertainment', type: 'expense', color: '#E91E63', budgetEnabled: false },
+      { name: 'Shopping', type: 'expense', color: '#9C27B0', budgetEnabled: true },
+      { name: 'Utilities', type: 'expense', color: '#FF9800', budgetEnabled: true },
+      { name: 'Healthcare', type: 'expense', color: '#00BCD4', budgetEnabled: true },
+      { name: 'Personal Care', type: 'expense', color: '#795548', budgetEnabled: false },
+      { name: 'Education', type: 'expense', color: '#607D8B', budgetEnabled: true },
+      { name: 'Gifts & Donations', type: 'expense', color: '#F44336', budgetEnabled: false },
+      { name: 'Investments', type: 'income', color: '#4CAF50', budgetEnabled: true },
+      { name: 'Other Income', type: 'income', color: '#8BC34A', budgetEnabled: true },
+      { name: 'Other Expenses', type: 'expense', color: '#9E9E9E', budgetEnabled: false },
     ];
 
     this.users.push({
@@ -97,6 +97,7 @@ export class MockDatabase {
         name: category.name!,
         type: category.type!,
         color: category.color!,
+        budgetEnabled: category.budgetEnabled!,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

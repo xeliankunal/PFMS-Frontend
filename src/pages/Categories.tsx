@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useFinance } from "@/api/context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Category } from "@/api/models";
 import { Plus, Edit, Trash2, Tags, Circle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 
 const Categories = () => {
   const { categories, createCategory, updateCategory, deleteCategory } = useFinance();
@@ -20,7 +20,8 @@ const Categories = () => {
   const [newCategory, setNewCategory] = useState({
     name: "",
     type: "expense" as "income" | "expense",
-    color: "#9b87f5" // Default color
+    color: "#9b87f5", // Default color
+    budgetEnabled: false
   });
 
   const colorOptions = [
@@ -46,7 +47,8 @@ const Categories = () => {
     setNewCategory({
       name: "",
       type: "expense",
-      color: "#9b87f5"
+      color: "#9b87f5",
+      budgetEnabled: false
     });
     setIsAddDialogOpen(false);
   };
@@ -56,7 +58,8 @@ const Categories = () => {
       await updateCategory(selectedCategory.id, {
         name: selectedCategory.name,
         type: selectedCategory.type,
-        color: selectedCategory.color
+        color: selectedCategory.color,
+        budgetEnabled: selectedCategory.budgetEnabled
       });
       setIsEditDialogOpen(false);
       setSelectedCategory(null);
@@ -118,6 +121,17 @@ const Categories = () => {
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="budgetEnabled">Budget Tracking</Label>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="budgetEnabled"
+                    checked={newCategory.budgetEnabled}
+                    onCheckedChange={(checked) => setNewCategory({...newCategory, budgetEnabled: checked})}
+                  />
+                  <Label htmlFor="budgetEnabled">Enable budget tracking for this category</Label>
+                </div>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="color">Color</Label>
                 <Select
                   value={newCategory.color}
@@ -163,7 +177,6 @@ const Categories = () => {
         </Dialog>
       </div>
 
-      {/* Edit Category Dialog */}
       {selectedCategory && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
@@ -193,6 +206,17 @@ const Categories = () => {
                     <SelectItem value="expense">Expense</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editBudgetEnabled">Budget Tracking</Label>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editBudgetEnabled"
+                    checked={selectedCategory?.budgetEnabled}
+                    onCheckedChange={(checked) => setSelectedCategory(prev => ({...prev!, budgetEnabled: checked}))}
+                  />
+                  <Label htmlFor="editBudgetEnabled">Enable budget tracking for this category</Label>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="editColor">Color</Label>
